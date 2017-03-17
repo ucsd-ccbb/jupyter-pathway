@@ -10,6 +10,18 @@ from copy import deepcopy
 import mygene
 mg = mygene.MyGeneInfo()
 
+import pandas
+from bioservices.kegg import KEGG
+import networkx as nx
+import visJS_module
+import math
+import xml.etree.ElementTree as ET
+import spectra
+from copy import deepcopy
+#from ensembl_to_entrez import entrez_to_symbol
+import mygene
+mg = mygene.MyGeneInfo()
+
 def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
     """
     The pathwayVisualization function returns a graph visualization based on user input
@@ -26,6 +38,7 @@ def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
     
     s = KEGG()
     result = s.parse_kgml_pathway(KEGG_id)
+    
     ETroot = parsingXML(KEGG_id, s)
     
     G=nx.DiGraph()
@@ -45,8 +58,12 @@ def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
     else:
         addAndRedirectEdges(G, result, complex_array, component_array, parent_list, parent_dict, node_dict, comp_dict)
     
+    #add reactions to graph
+    addReaction(G, ETroot)
+    
     edge_to_name = dict()
     for edge in G.edges():
+        print edge
         if G.edge[edge[0]][edge[1]]['name'] == 'phosphorylation':
             edge_to_name[edge] = G.edge[edge[0]][edge[1]]['value']
         elif G.edge[edge[0]][edge[1]]['name'] == 'dephosphorylation':
@@ -57,8 +74,16 @@ def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
         elif 'phosphorylation' in G.edge[edge[0]][edge[1]]['name']:
             edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name'].replace('phosphorylation', '+p')
             edge_to_name[edge] = edge_to_name[edge].replace('\n', ', ')
+        #remove activation and inhibition labels
+        elif 'activation' in G.edge[edge[0]][edge[1]]['name']:
+            edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name'].remove('activation')
+            edge_to_name[edge] = edge_to_name[edge].replace('\n', ', ')
+        elif 'inhibition' in G.edge[edge[0]][edge[1]]['name']:
+            edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name'].remove('inhibition')
+            edge_to_name[edge] = edge_to_name[edge].replace('\n', ', ')
         else:
             edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name']
+            #print edge_to_name[edge]
 
     #edges are transparent
     edge_to_color = dict()
@@ -116,7 +141,9 @@ def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
     
     # color nodes based on log2fold data
     node_to_color = dict()
+    
     for node in G.nodes():
+
         if node in id_to_log2fold:
             node_to_color[node] = my_scale(id_to_log2fold[node][0]).hexcode
 
@@ -144,6 +171,7 @@ def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
     time = 1700
 
     # create graph here
+    #return G
     return visJS_module.visjs_network(nodes_dict, edges_dict, time_stamp = time, node_label_field = "id_num", 
                                edge_width = 3, border_color = "black", edge_arrow_to = True, edge_font_size = 15,
                                edge_font_align= "top", physics_enabled = False, graph_width = 1000, graph_height = 1000)
@@ -167,7 +195,7 @@ def parsingXML(KEGG_id, s):
     # convert to XML
     root = ET.fromstring(kgml_str)
     return root
-
+    
 def addNodes(G, res):
     max_id = 0
     compound_array = []
@@ -373,6 +401,7 @@ def addEdges(G, res, comp_array_total, node_to_comp):
     edge_pairs = []
     # add edges to networkx graph
     # redirect edges to point to undefined nodes containing components in order to connect graph
+    #print res['relations']
     for edge in res['relations']:
         source = edge['entry1']
         dest = edge['entry2']
@@ -492,6 +521,21 @@ def addAndRedirectEdges(G, res, complex_array, comp_array_total, parent_list, pa
             else:
                 G.add_edge(source, dest, edge)
 
+def addReaction(G, ETroot):
+    for entry in ETroot.findall('reaction'):
+        entryDict = dict()
+        entryDict['reaction'] =  entry.attrib['name']
+        entryDict['name'] =  entry.attrib['type']
+        #source
+        substrate = entry.find('substrate')
+        source = substrate.attrib["id"]
+        entryDict['entry1'] = substrate.attrib["name"]
+        #dest
+        product = entry.find('product')
+        dest = product.attrib["id"]
+        entryDict['entry2'] = product.attrib["name"]
+        G.add_edge(source, dest, entryDict)
+        
 def log2FoldChange(G, path_to_csv):
     # log2FoldChange 
     DE_genes_df = pandas.read_csv(path_to_csv)
@@ -534,9 +578,3 @@ def log2FoldChange(G, path_to_csv):
 def entrez_to_symbol(query_gene):
     result = mg.getgene(query_gene, fields='symbol')
     return result['symbol']
-
-    
-    
-    
-    
-    
