@@ -1,24 +1,11 @@
 import pandas
 from bioservices.kegg import KEGG
 import networkx as nx
-import visJS_module
+from visJS2jupyter import visJS_module
 import math
 import xml.etree.ElementTree as ET
 import spectra
 from copy import deepcopy
-#from ensembl_to_entrez import entrez_to_symbol
-import mygene
-mg = mygene.MyGeneInfo()
-
-import pandas
-from bioservices.kegg import KEGG
-import networkx as nx
-import visJS_module
-import math
-import xml.etree.ElementTree as ET
-import spectra
-from copy import deepcopy
-#from ensembl_to_entrez import entrez_to_symbol
 import mygene
 mg = mygene.MyGeneInfo()
 
@@ -63,27 +50,21 @@ def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
     
     edge_to_name = dict()
     for edge in G.edges():
-        print edge
         if G.edge[edge[0]][edge[1]]['name'] == 'phosphorylation':
             edge_to_name[edge] = G.edge[edge[0]][edge[1]]['value']
         elif G.edge[edge[0]][edge[1]]['name'] == 'dephosphorylation':
             edge_to_name[edge] = G.edge[edge[0]][edge[1]]['value']
         elif 'dephosphorylation' in G.edge[edge[0]][edge[1]]['name']:
             edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name'].replace('dephosphorylation', '-p')
-            edge_to_name[edge] = edge_to_name[edge].replace('\n', ', ')
         elif 'phosphorylation' in G.edge[edge[0]][edge[1]]['name']:
             edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name'].replace('phosphorylation', '+p')
-            edge_to_name[edge] = edge_to_name[edge].replace('\n', ', ')
-        #remove activation and inhibition labels
-        elif 'activation' in G.edge[edge[0]][edge[1]]['name']:
-            edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name'].remove('activation')
-            edge_to_name[edge] = edge_to_name[edge].replace('\n', ', ')
-        elif 'inhibition' in G.edge[edge[0]][edge[1]]['name']:
-            edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name'].remove('inhibition')
-            edge_to_name[edge] = edge_to_name[edge].replace('\n', ', ')
         else:
             edge_to_name[edge] = G.edge[edge[0]][edge[1]]['name']
-            #print edge_to_name[edge]
+            
+        edge_to_name[edge] = edge_to_name[edge].replace('activation, ', '')
+        edge_to_name[edge] = edge_to_name[edge].replace('inhibition, ', '')
+        edge_to_name[edge] = edge_to_name[edge].replace('activation', '')
+        edge_to_name[edge] = edge_to_name[edge].replace('inhibition', '')
 
     #edges are transparent
     edge_to_color = dict()
@@ -401,7 +382,6 @@ def addEdges(G, res, comp_array_total, node_to_comp):
     edge_pairs = []
     # add edges to networkx graph
     # redirect edges to point to undefined nodes containing components in order to connect graph
-    #print res['relations']
     for edge in res['relations']:
         source = edge['entry1']
         dest = edge['entry2']
