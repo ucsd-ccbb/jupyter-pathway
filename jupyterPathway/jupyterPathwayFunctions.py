@@ -24,6 +24,12 @@ def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
     """
     
     s = KEGG()
+    
+    res = s.get(KEGG_id, "kgml")
+    if res == 404:
+        print KEGG_id + ' is not a valid KEGG ID'
+        return
+    
     result = s.parse_kgml_pathway(KEGG_id)
     
     ETroot = parsingXML(KEGG_id, s)
