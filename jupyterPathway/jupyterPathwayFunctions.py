@@ -26,7 +26,8 @@ def pathwayVisualization(KEGG_id, path_to_csv, redirect=True, compound=False):
     s = KEGG()
     
     res = s.get(KEGG_id, "kgml")
-    if res == 404:
+    
+    if res == 404 or res == 400:
         print KEGG_id + ' is not a valid KEGG ID'
         return
     
