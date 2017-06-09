@@ -1,19 +1,30 @@
 # jupyter-pathway
 Canonical pathway visualization and analysis 
 
-## Installation
+## Getting Started
 
 ### Prerequisites
 
 You must already have Jupyter notebook installed. Visit [here](http://jupyter.org/install.html) for more information.
 
+Install [pandas](http://pandas.pydata.org/), [bioservices](http://www.pythonhosted.org/bioservices/), and [mygene](http://docs.mygene.info/projects/mygene-py/en/latest/) for data processing.
+
 ```sh
 pip install pandas
 pip install bioservices
+pip install mygene
+```
+
+To use the visualizations module, install [networkX](https://networkx.github.io/), [visJS2jupyter](https://github.com/ucsd-ccbb/visJS2jupyter) and [spectra](https://github.com/jsvine/spectra).
+
+```sh
 pip install networkx
 pip install visJS2jupyter
 pip install spectra
-pip install mygene
+```
+
+### Installation
+```sh
 pip install jupyterPathway
 ```
 
