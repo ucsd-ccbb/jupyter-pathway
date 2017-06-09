@@ -3,6 +3,12 @@ Canonical pathway visualization and analysis
 
 ## Installation
 
+### Prerequisites
+
+You must already have Jupyter notebook installed. 
+
+Visit [here](http://matplotlib.org/users/installing.html) for more information.
+
 ```sh
 pip install pandas
 pip install bioservices
