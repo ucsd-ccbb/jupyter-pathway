@@ -32,7 +32,9 @@ pip install jupyterPathway
 
 To import `pathwayVisualization`, use the following:
 
+```sh
 from jupyterPathway.jupyterPathwayFunctions import pathwayVisualization
+```
 
 ## Walkthrough
 
