@@ -24,9 +24,13 @@ pip install spectra
 ```
 
 ### Installation
+
+You can install jupyterPathway using pip:
 ```sh
 pip install jupyterPathway
 ```
+
+To import 
 
 ## Walkthrough
 
