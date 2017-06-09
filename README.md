@@ -30,7 +30,9 @@ You can install jupyterPathway using pip:
 pip install jupyterPathway
 ```
 
-To import 
+To import `pathwayVisualization`, use the following:
+
+from jupyterPathway.jupyterPathwayFunctions import pathwayVisualization
 
 ## Walkthrough
 
